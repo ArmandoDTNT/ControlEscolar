@@ -91,9 +91,9 @@ class ControlEscolar(
     private fun agregaUnaMateria() {
         ManagerInteraccion.cleanInput()
         println("Por favor indique el nombre de la materia")
-        val nombreDeLaMateria: String = ingresaTexto()
+        val nombreDeLaMateria: String = ManagerInteraccion.getNextLine()
         println("Por favor indique el codigo de la materia")
-        val codigoDeLaMateria: String = ingresaTexto()
+        val codigoDeLaMateria: String = ManagerInteraccion.getNextLine()
         try {
             profesor.agregarMateria(nombreDeLaMateria, codigoDeLaMateria)
         } catch (e: MateriaPreviamenteAgregadaException) {
@@ -138,9 +138,9 @@ class ControlEscolar(
     private fun agregaUnGrupo() {
         ManagerInteraccion.cleanInput()
         println("Por favor indique el nombre del Grupo")
-        val nombreDelGrupo: String = ingresaTexto()
+        val nombreDelGrupo: String = ManagerInteraccion.getNextLine()
         println("Por favor indique el ciclo escolar")
-        val cicloEscolar: String = ingresaTexto()
+        val cicloEscolar: String = ManagerInteraccion.getNextLine()
         try {
             profesor.agregarGrupo(nombreDelGrupo, cicloEscolar)
         } catch (e: MateriaPreviamenteAgregadaException) {
@@ -322,11 +322,6 @@ class ControlEscolar(
         execute()
     }
 
-
-    /**
-     * Proporciona al usuario la opcion de interactuar con el sistema por medio de un String.
-     */
-    private fun ingresaTexto(): String = ManagerInteraccion.getNextLine()
 
 
 }
