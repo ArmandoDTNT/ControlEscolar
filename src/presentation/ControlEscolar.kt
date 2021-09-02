@@ -1,10 +1,10 @@
-package main.ui
+package main.presentation
 
 import domain.entity.Grupo
-import main.data.Profesor
 import domain.exception.agrega_materia.MateriaPreviamenteAgregadaException
+import main.data.Profesor
 import main.presentation.manager.ManagerInteraccion
-import main.presentation.ui.getInformation
+import main.presentation.manager.ManagerMateria
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -14,6 +14,9 @@ import kotlin.system.exitProcess
 class ControlEscolar(
     private val profesor: Profesor,
 ) {
+
+    /* */
+    private val managerMateria: ManagerMateria = ManagerMateria(profesor)
 
     /**
      * Punto de entrada para la ejecucion del programa
@@ -30,7 +33,10 @@ class ControlEscolar(
             4 -> ejecutaFlujoParaEliminarUnGrupo()
             5 -> inscribiralumno()
             6 -> {}//eliminaUnAlumno()
-            7 -> consultaListaDeMaterias()
+            7 -> {
+                managerMateria.consultaListaDeMaterias()
+                redireccionaMenu()
+            }
             8 -> {}//consultaListaDeGrupos()
             9 -> {}//asignarEvaluaciones()
             10 -> ejecutaFlujoParaIniciarCurso()
@@ -181,24 +187,6 @@ class ControlEscolar(
                 redireccionaMenu()
             }
         }
-    }
-
-    /**
-     *  Despliega al usuario la lista de materias agregadas y en caso de no haber aguna permite al usuario agregarla.
-     */
-    fun consultaListaDeMaterias() {
-        val listaDeMaterias = profesor.getMaterias().filter { it.fechaDeEliminacion == null }
-        if (listaDeMaterias.isEmpty()) {
-            val title: String = "Aun no hay materias inscritas"
-            val content: String = "¿Desea agregar una materia?"
-            redireccionaFlujo(title, content, action = ::agregaUnaMateria)
-            return
-        }
-        println("Las materias inscritas hasta el momento son:")
-        listaDeMaterias.forEachIndexed { index, materia ->
-            println("${index.inc()} ${materia.getInformation()}")
-        }
-        redireccionaMenu()
     }
 
     /**

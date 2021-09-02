@@ -1,7 +1,7 @@
 package main
 
 import main.data.Profesor
-import main.ui.ControlEscolar
+import main.presentation.ControlEscolar
 
 /**
  *  Clase encargada de la ejecucion del programa
