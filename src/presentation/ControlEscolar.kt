@@ -45,10 +45,14 @@ class ControlEscolar(
                 managerGrupo.ejecutaFlujoParaEliminarUnGrupo()
                 ManagerInteraccion.awaitForEnterKeyInteraction()
             }
-            6 -> {}//eliminaUnAlumno()
-            7 -> {}
-            8 -> {}//consultaListaDeGrupos()
-            9 -> {}//asignarEvaluaciones()
+            6 -> {
+            }//eliminaUnAlumno()
+            7 -> {
+            }
+            8 -> {
+            }//consultaListaDeGrupos()
+            9 -> {
+            }//asignarEvaluaciones()
             10 -> ejecutaFlujoParaIniciarCurso()
             11 -> ejecutaFlujoParaFinalizarElCurso()
             null -> {
@@ -99,11 +103,11 @@ class ControlEscolar(
     /**
      * Inicia el flujo para asignar la fecha de inicio del curso
      */
-    fun ejecutaFlujoParaIniciarCurso(){
+    fun ejecutaFlujoParaIniciarCurso() {
         ManagerInteraccion.cleanInput()
         println("Selecciona el grupo para iniciar el curso")
         val listaDeGrupos = profesor.getGrupos().filterNot { it.haIniciado() }
-        if (listaDeGrupos.isEmpty()){
+        if (listaDeGrupos.isEmpty()) {
             val title: String = "Aun no ha dado de alta algun grupo"
             return
         }
@@ -128,11 +132,11 @@ class ControlEscolar(
     /**
      * Inicializa flujo para fijar la fecha de termino del curso
      */
-    fun ejecutaFlujoParaFinalizarElCurso(){
+    fun ejecutaFlujoParaFinalizarElCurso() {
         ManagerInteraccion.cleanInput()
         println("Selecciona el grupo para finalizar el curso")
         val listaDeGrupos = profesor.getGrupos().filter { it.haIniciado() }
-        if (listaDeGrupos.isEmpty()){
+        if (listaDeGrupos.isEmpty()) {
             println("Aun no hay grupos que hayan iniciado el semestre")
             redireccionaMenu()
         }
@@ -190,13 +194,10 @@ class ControlEscolar(
      * Se presenta la informacion de [title] y [content] al usuario y se brinda la [action] para poder redireccionar
      * al flujo deseado.
      */
-     fun redireccionaMenu() {
+    fun redireccionaMenu() {
         ManagerInteraccion.cleanInput()
         println("Presiona Enter para continuar")
         ManagerInteraccion.awaitForEnterKeyInteraction()
         execute()
     }
-
-
-
 }
