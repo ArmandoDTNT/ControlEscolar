@@ -3,6 +3,8 @@ package main.presentation
 import domain.entity.Grupo
 import domain.exception.agrega_materia.MateriaPreviamenteAgregadaException
 import main.data.Profesor
+import main.presentation.manager.ManagerAlumno
+import main.presentation.manager.ManagerGrupo
 import main.presentation.manager.ManagerInteraccion
 import main.presentation.manager.ManagerMateria
 import java.util.*
@@ -17,6 +19,8 @@ class ControlEscolar(
 
     /* */
     private val managerMateria: ManagerMateria = ManagerMateria(profesor)
+    private val managerGrupo: ManagerGrupo = ManagerGrupo(profesor)
+    private val managerAlumno: ManagerAlumno = ManagerAlumno(profesor)
 
     /**
      * Punto de entrada para la ejecucion del programa
@@ -27,16 +31,22 @@ class ControlEscolar(
         val opcionSeleccionada: Int? = ManagerInteraccion.getOption()
         when (opcionSeleccionada) {
             0 -> finalizaPrograma()
-            1 -> agregaUnaMateria()
-            2 -> ejecutaFlujoParaEliminarUnaMateria()
-            3 -> agregaUnGrupo()
-            4 -> ejecutaFlujoParaEliminarUnGrupo()
-            5 -> inscribiralumno()
-            6 -> {}//eliminaUnAlumno()
-            7 -> {
-                managerMateria.consultaListaDeMaterias()
-                redireccionaMenu()
+            1 -> managerMateria.agregaUnaMateria()
+            2 -> {
+                managerMateria.ejecutaFlujoParaEliminarUnaMateria()
+                ManagerInteraccion.awaitForEnterKeyInteraction()
             }
+            3 -> {
+                managerMateria.consultaListaDeMaterias()
+                ManagerInteraccion.awaitForEnterKeyInteraction()
+            }
+            4 -> managerGrupo.agregaUnGrupo()
+            5 -> {
+                managerGrupo.ejecutaFlujoParaEliminarUnGrupo()
+                ManagerInteraccion.awaitForEnterKeyInteraction()
+            }
+            6 -> {}//eliminaUnAlumno()
+            7 -> {}
             8 -> {}//consultaListaDeGrupos()
             9 -> {}//asignarEvaluaciones()
             10 -> ejecutaFlujoParaIniciarCurso()
@@ -62,17 +72,17 @@ class ControlEscolar(
      */
     private fun muestraMenu() {
         val menu: String = """
-        1. Agregar una materia
-        2. Elimina una materia
-        3. Agregar un grupo
-        4. Elimina un grupo
-        5. Inscribir un Alumno
-        6. Eliminar un Alumno
-        7. Consultar lista de Materias
-        8. Consultar lista de Grupos
-        9. Asignar evaluaciones
-        10. Iniciar Curso
-        11. Finalizar Curso
+        . Agregar una materia
+        . Elimina una materia
+        . Consulta lista de materias
+        . Elimina un grupo
+        . Inscribir un Alumno
+        . Eliminar un Alumno
+        . Consultar lista de Materias
+        . Consultar lista de Grupos
+        . Asignar evaluaciones
+        . Iniciar Curso
+        . Finalizar Curso
         0. Finalizar Programa
     """.trimIndent()
         println(menu)
@@ -87,128 +97,7 @@ class ControlEscolar(
     }
 
     /**
-     *  Solicita al usuario los datos nombre de la materia y codigo de materia, al crear la instancia materia se valida
-     *  que que no se cuente con alguna agregada anteriormente.
-     *
-     *  @throws MateriaPreviamenteAgregadaException cuando la materia ya se encuentra dentro de la lista, se indica al usuario y se brinda la
-     *  posibilidad de intentar con otra materia.
-     */
-    @Throws(MateriaPreviamenteAgregadaException::class)
-    private fun agregaUnaMateria() {
-        ManagerInteraccion.cleanInput()
-        println("Por favor indique el nombre de la materia")
-        val nombreDeLaMateria: String = ManagerInteraccion.getNextLine()
-        println("Por favor indique el codigo de la materia")
-        val codigoDeLaMateria: String = ManagerInteraccion.getNextLine()
-        try {
-            profesor.agregarMateria(nombreDeLaMateria, codigoDeLaMateria)
-        } catch (e: MateriaPreviamenteAgregadaException) {
-            val title: String =
-                "La materia $nombreDeLaMateria con codigo $codigoDeLaMateria ya se encuentra en la lista"
-            val content: String = "¿Desea intentar con otra materia?"
-            redireccionaFlujo(title, content, action = this::agregaUnaMateria)
-            return
-        }
-        val title: String = "La materia $nombreDeLaMateria con codigo $codigoDeLaMateria se ha agregado con exito"
-        val content: String = "¿Desea agregar otra materia?"
-        redireccionaFlujo(title, content, action = ::agregaUnaMateria)
-    }
-
-    /**
-     * Despliega un menu de materias que aun no han sido eliminadas y brinda la posibilidad de comenzar el flujo para
-     * eliminar alguna de las mostradas.
-     */
-    fun ejecutaFlujoParaEliminarUnaMateria() {
-        ManagerInteraccion.cleanInput()
-        val listaDeMaterias = profesor.getMaterias().filter { it.fechaDeEliminacion != null }
-        println("Selecciona la materia que deseas eliminar")
-        listaDeMaterias.forEachIndexed { index, materia ->
-            println("${index.inc()} $materia")
-        }
-        val opcionSeleccionada = ManagerInteraccion.getOption() ?: -1
-        if (opcionSeleccionada !in 1..listaDeMaterias.size) {
-            println("Por favor selecciona una opcion dentro del menu")
-            ejecutaFlujoParaEliminarUnaMateria()
-        }
-        val materiaSeleccionada = listaDeMaterias.get(opcionSeleccionada.dec())
-        materiaSeleccionada.eliminaMateria()
-    }
-
-    /**
-     *  Solicita al usuario los datos nombre del grupo y codigo del grupo este ultimo en formato "YYYY-(01/01)",
-     *  al crear la instancia grupo se valida que no se cuente con alguno agregado anteriormente.
-     *
-     *  @throws GrupoPreviamenteAgregadoExcetion cuando la materia ya se encuentra dentro de la lista, se indica al usuario y se brinda la
-     *  posibilidad de intentar con otra materia.
-     */
-    private fun agregaUnGrupo() {
-        ManagerInteraccion.cleanInput()
-        println("Por favor indique el nombre del Grupo")
-        val nombreDelGrupo: String = ManagerInteraccion.getNextLine()
-        println("Por favor indique el ciclo escolar")
-        val cicloEscolar: String = ManagerInteraccion.getNextLine()
-        try {
-            profesor.agregarGrupo(nombreDelGrupo, cicloEscolar)
-        } catch (e: MateriaPreviamenteAgregadaException) {
-            val title: String = "El grupo $nombreDelGrupo con ciclo escolar $cicloEscolar ya se encuentra en la lista"
-            val content: String = "¿Desea intentar con otra materia?"
-            redireccionaFlujo(title, content, action = ::agregaUnGrupo)
-            return
-        }
-        val title: String = "\"El grupo $nombreDelGrupo con ciclo escolar $cicloEscolar se ha agregado con exito"
-        val content: String = "¿Desea agregar con otro Grupo?"
-        redireccionaFlujo(title, content, action = ::agregaUnGrupo)
-    }
-
-    /**
-     * Despliega un menu de grupos que aun no han sido eliminadas y brinda la posibilidad de comenzar el flujo para
-     * eliminar alguno de las mostrados.
-     */
-    fun ejecutaFlujoParaEliminarUnGrupo() {
-        val listaDeGrupos = profesor.getGrupos().filter { it.fechaDeEliminacion == null }
-        if (listaDeGrupos.isEmpty()) {
-            val title: String = "Aun no has dado de alta algun grupo"
-            val content: String = "¿Quieres crear un grupo?"
-            redireccionaFlujo(title,content,action = ::agregaUnGrupo)
-            return
-        }
-        listaDeGrupos.forEachIndexed { index, grupo ->
-            println("${index.inc()} $grupo")
-        }
-        val opcionSeleccionada: Int = ManagerInteraccion.getOption() ?: -1
-        when {
-            opcionSeleccionada in 1..listaDeGrupos.size ->{
-                println("Por favor selecciona una opcion valida dentro del menu")
-                ejecutaFlujoParaEliminarUnGrupo()
-            }
-            else -> {
-                val grupoSeleccionado = listaDeGrupos.get(opcionSeleccionada.dec())
-                println("El grupo $grupoSeleccionado, se ha eliminado con exito")
-                redireccionaMenu()
-            }
-        }
-    }
-
-    /**
-     *  Solicita al usuario el nombre y numero de cuenta del alumno, despliega una lista de grupos filtrada a grupos
-     *  en los que aun no se da inicio el semestre, al crear la instancia Alumno se valida que no se encuentre inscrito
-     *  anteriormente a esa instancia de grupo.
-     *
-     *  @throws AlumnoPreviamenteInscritoException cuando la materia ya se encuentra dentro de la lista, se indica al
-     *  usuario y se brinda la posibilidad de intentar con otra materia.
-     */
-    fun inscribiralumno() {
-        println("Por favor seleccione el grupo al que desea inscribir al alumno")
-        val gruposDisponibles = profesor.getGrupos()
-        gruposDisponibles.forEachIndexed { index, grupo ->
-            var index = 0
-            index++
-            println("$index $grupo")
-        }
-    }
-
-    /**
-     * Inicia la fecha de inicio del curso
+     * Inicia el flujo para asignar la fecha de inicio del curso
      */
     fun ejecutaFlujoParaIniciarCurso(){
         ManagerInteraccion.cleanInput()
@@ -216,8 +105,6 @@ class ControlEscolar(
         val listaDeGrupos = profesor.getGrupos().filterNot { it.haIniciado() }
         if (listaDeGrupos.isEmpty()){
             val title: String = "Aun no ha dado de alta algun grupo"
-            val content: String = "¿Desea dar de alta un grupo?"
-            redireccionaFlujo(title,content,action = ::agregaUnGrupo)
             return
         }
         listaDeGrupos.forEachIndexed { index, grupo ->
@@ -239,7 +126,7 @@ class ControlEscolar(
     }
 
     /**
-     * Inicializa la fecha de termino del curso
+     * Inicializa flujo para fijar la fecha de termino del curso
      */
     fun ejecutaFlujoParaFinalizarElCurso(){
         ManagerInteraccion.cleanInput()
@@ -271,7 +158,7 @@ class ControlEscolar(
      * Se presenta la informacion de [title] y [content] al usuario y se brinda la [action] para poder redireccionar
      * al flujo deseado.
      */
-    private fun redireccionaFlujo(
+    fun redireccionaFlujo(
         title: String,
         content: String,
         action: () -> Unit
@@ -303,7 +190,7 @@ class ControlEscolar(
      * Se presenta la informacion de [title] y [content] al usuario y se brinda la [action] para poder redireccionar
      * al flujo deseado.
      */
-    private fun redireccionaMenu() {
+     fun redireccionaMenu() {
         ManagerInteraccion.cleanInput()
         println("Presiona Enter para continuar")
         ManagerInteraccion.awaitForEnterKeyInteraction()

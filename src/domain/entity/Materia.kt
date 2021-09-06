@@ -12,8 +12,5 @@ data class Materia(
         fechaDeEliminacion = Date()
     }
 
-    fun eliminada() {
-        val eliminada: Boolean = fechaDeEliminacion != null
-    }
 
 }
