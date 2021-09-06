@@ -9,8 +9,6 @@ class ManagerMateria(
     private val profesor: Profesor,
 ) {
 
-    /* */
-
     /**
      *  Despliega al usuario la lista de materias agregadas.
      */
@@ -46,7 +44,6 @@ class ManagerMateria(
             val title: String =
                 "La materia $nombreDeLaMateria con codigo $codigoDeLaMateria ya se encuentra en la lista"
             val content: String = "¿Desea intentar con otra materia?"
-            return
         }
         val title: String = "La materia $nombreDeLaMateria con codigo $codigoDeLaMateria se ha agregado con exito"
         val content: String = "¿Desea agregar otra materia?"
@@ -56,11 +53,12 @@ class ManagerMateria(
      * Despliega un menu de materias que aun no han sido eliminadas y brinda la posibilidad de comenzar el flujo para
      * eliminar alguna de las mostradas.
      */
-    fun ejecutaFlujoParaEliminarUnaMateria() {
-        ManagerInteraccion.cleanInput()
+    fun ejecutaFlujoParaEliminarUnaMateria(onComplete: () -> Unit) {
         val listaDeMaterias = profesor.getMaterias().filter { it.fechaDeEliminacion == null }
         if (listaDeMaterias.isEmpty()) {
             println("Aun no hay materias que puedas eliminar")
+            // Redirecciona menu
+            onComplete.invoke()
         } else {
             println("Selecciona la materia que deseas eliminar")
             listaDeMaterias.forEachIndexed { index, materia ->
@@ -69,11 +67,14 @@ class ManagerMateria(
             val opcionSeleccionada = ManagerInteraccion.getOption() ?: -1
             if (opcionSeleccionada !in 1..listaDeMaterias.size) {
                 println("Por favor selecciona una opcion dentro del menu")
-                ejecutaFlujoParaEliminarUnaMateria()
+                ManagerInteraccion.cleanInput()
+                ejecutaFlujoParaEliminarUnaMateria(onComplete)
             } else {
                 val materiaSeleccionada = listaDeMaterias.get(opcionSeleccionada.dec())
                 materiaSeleccionada.eliminaMateria()
                 println("La materia $materiaSeleccionada se ha eliminado con exito")
+                // Redirecciona menu
+                onComplete.invoke()
             }
         }
     }

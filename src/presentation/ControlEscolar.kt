@@ -11,7 +11,7 @@ import java.util.*
 import kotlin.system.exitProcess
 
 /**
- *
+ * Clase encargada de controlar la interaccion entre el programa y el usuario del mismo.
  */
 class ControlEscolar(
     private val profesor: Profesor,
@@ -31,16 +31,16 @@ class ControlEscolar(
         val opcionSeleccionada: Int? = ManagerInteraccion.getOption()
         when (opcionSeleccionada) {
             0 -> finalizaPrograma()
-            1 -> managerMateria.agregaUnaMateria()
+            1 -> managerMateria.agregaUnaMateria()//TODO Verificar redireccionamiento
             2 -> {
-                managerMateria.ejecutaFlujoParaEliminarUnaMateria()
+                managerMateria.ejecutaFlujoParaEliminarUnaMateria(::redireccionaMenu)
                 ManagerInteraccion.awaitForEnterKeyInteraction()
             }
             3 -> {
                 managerMateria.consultaListaDeMaterias()
                 ManagerInteraccion.awaitForEnterKeyInteraction()
             }
-            4 -> managerGrupo.agregaUnGrupo()
+            4 -> managerGrupo.agregaUnGrupo()//TODO Verificar redireccionamiento
             5 -> {
                 managerGrupo.ejecutaFlujoParaEliminarUnGrupo()
                 ManagerInteraccion.awaitForEnterKeyInteraction()
@@ -76,14 +76,15 @@ class ControlEscolar(
      */
     private fun muestraMenu() {
         val menu: String = """
-        . Agregar una materia
+        . Agrega una materia
         . Elimina una materia
         . Consulta lista de materias
+        . Agrega un grupo
         . Elimina un grupo
-        . Inscribir un Alumno
-        . Eliminar un Alumno
-        . Consultar lista de Materias
-        . Consultar lista de Grupos
+        . Consulta lista de un Grupo
+        . Inscribe un Alumno
+        . Elimina un Alumno
+        . 
         . Asignar evaluaciones
         . Iniciar Curso
         . Finalizar Curso

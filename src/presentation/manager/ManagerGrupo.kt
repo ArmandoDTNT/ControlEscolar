@@ -29,7 +29,6 @@ class ManagerGrupo(
         }
         val title: String = "\"El grupo $nombreDelGrupo con ciclo escolar $cicloEscolar se ha agregado con exito"
         val content: String = "¿Desea agregar con otro Grupo?"
-
     }
 
     /**
@@ -54,7 +53,6 @@ class ManagerGrupo(
             else -> {
                 val grupoSeleccionado = listaDeGrupos.get(opcionSeleccionada.dec())
                 println("El grupo $grupoSeleccionado, se ha eliminado con exito")
-                ManagerInteraccion.awaitForEnterKeyInteraction()
             }
         }
     }
