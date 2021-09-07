@@ -3,9 +3,6 @@ package main.presentation.manager
 import domain.entity.Materia
 import domain.exception.agrega_materia.MateriaPreviamenteAgregadaException
 import main.data.Profesor
-import main.presentation.ControlEscolar
-import main.presentation.ui.getInformation
-import kotlin.reflect.KFunction
 
 class ManagerMateria(
     private val profesor: Profesor,
@@ -21,7 +18,7 @@ class ManagerMateria(
         } else {
             println("Las materias inscritas hasta el momento son:")
             listaDeMaterias.forEachIndexed { index, materia ->
-                println("${index.inc()} ${materia.getInformation()}")
+                println("${index.inc()} ${materia.nombreDeMateria} ${materia.codigoDeMateria}")
             }
         }
     }
@@ -86,6 +83,10 @@ class ManagerMateria(
         }
     }
 
+    /**
+     * Inicia el flujo para editar una materia brindando la posibilidad de editarla por dos flujos distintos
+     * sean estos codigo de materia o seleccionandola de una lista
+     */
     fun editaUnaMateria(onComplete: () -> Unit) {
         val menuEditaMateria: String = """
             Selecciona una opcion para identificar la materia
@@ -95,14 +96,8 @@ class ManagerMateria(
         println(menuEditaMateria)
         val opcionSeleccionada: Int? = ManagerInteraccion.getOption()
         when (opcionSeleccionada) {
-            1 -> {
-                editaMateriaConCodigo(onComplete)
-                onComplete.invoke()
-            }
-            2 -> {
-                editaMateriaDeLista(onComplete)
-                onComplete.invoke()
-            }
+            1 -> editaMateriaConCodigo(onComplete)
+            2 -> editaMateriaDeLista(onComplete)
             else -> {
                 println("La opcion seleccionada no es valida, intenta nuevamente")
                 editaUnaMateria(onComplete)
@@ -110,14 +105,18 @@ class ManagerMateria(
         }
     }
 
-
+    /**
+     * Inicia el flujo para la edicion de una materia identificada por medio de su [codigoDeMateria]
+     */
     fun editaMateriaConCodigo(onComplete: () -> Unit) {
         val listaDeMaterias = profesor.getMaterias().filter { it.fechaDeEliminacion == null }
         if (listaDeMaterias.isEmpty()){
             println("Aun no cuentas con materias que puedas editar")
+            ManagerInteraccion.cleanInput()
             onComplete.invoke()
             return
         }
+        ManagerInteraccion.cleanInput()
         println("Proporciona el codigo de la materia que deseas editar")
         val codigo: String = ManagerInteraccion.getNextLine()
         val materiaAEditar = listaDeMaterias.firstOrNull { it.codigoDeMateria == codigo }
@@ -126,14 +125,18 @@ class ManagerMateria(
             onComplete.invoke()
             return
         }
-        datosNuevaMateria(materiaAEditar)
+        editaDatosDeMateria(materiaAEditar)
         onComplete.invoke()
     }
 
+    /**
+     * Inicia el flujo para la edicion de una materia identificada por medio de una lista de materias
+     */
     fun editaMateriaDeLista(onComplete: () -> Unit) {
         val listaDeMaterias = profesor.getMaterias().filter { it.fechaDeEliminacion == null }
         if (listaDeMaterias.isEmpty()) {
             println("Aun no cuentas con materias que puedas editar")
+            ManagerInteraccion.cleanInput()
             onComplete.invoke()
             return
         }
@@ -147,12 +150,16 @@ class ManagerMateria(
             editaMateriaDeLista(onComplete)
             return
         }
-        var materiaAEditar = listaDeMaterias.get(opcionSeleccionada.inc())
-        datosNuevaMateria(materiaAEditar)
+        val materiaAEditar = listaDeMaterias.get(opcionSeleccionada.dec())
+        editaDatosDeMateria(materiaAEditar)
+        onComplete.invoke()
     }
 
-
-    fun datosNuevaMateria(materiaAEditar: Materia) {
+    /**
+     * Identificada la materia a editar se realiza la toma de datos y se actualizan los atributos.
+     */
+    fun editaDatosDeMateria(materiaAEditar: Materia) {
+        ManagerInteraccion.cleanInput()
         println("Proporcione el nuevo nombre de la materia o presione enter para no modificar")
         val nuevoNombre: String = ManagerInteraccion.getNextLine()
         println("Proporcione el nuevo codigo de la materia o presione enter para no modificar")
@@ -166,10 +173,12 @@ class ManagerMateria(
             return
         }
         // Actualizamos el valor de la materia
-        if (nuevoNombre.isNotBlank())
+        if (nuevoNombre.isNotBlank()){
             materiaAEditar.nombreDeMateria = nuevoNombre
-        if (nuevoCodigo.isNotBlank())
+        }
+        if (nuevoCodigo.isNotBlank()){
             materiaAEditar.codigoDeMateria = nuevoCodigo
+        }
         println("Sus preferencias para Nombre y Codigo de materia se han realizado con exito")
     }
 }

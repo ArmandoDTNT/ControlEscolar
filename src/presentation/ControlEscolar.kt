@@ -30,6 +30,7 @@ class ControlEscolar(
         muestraMenu()
         val opcionSeleccionada: Int? = ManagerInteraccion.getOption()
         if (opcionSeleccionada !in 0..11) {
+            ManagerInteraccion.cleanInput()
             println("Por favor selecciona una opcion valida dentro del menu")
             execute()
         } else {
@@ -41,6 +42,7 @@ class ControlEscolar(
                 }
                 3 -> {
                     managerMateria.consultaListaDeMaterias()
+                    ManagerInteraccion.cleanInput()
                     redireccionaMenu()
                 }
                 4 -> managerMateria.editaUnaMateria(::redireccionaMenu)
@@ -201,7 +203,6 @@ class ControlEscolar(
      * al flujo deseado.
      */
     fun redireccionaMenu() {
-        ManagerInteraccion.cleanInput()
         println("Presiona Enter para continuar")
         ManagerInteraccion.awaitForEnterKeyInteraction()
         execute()
