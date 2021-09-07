@@ -8,8 +8,8 @@ import java.util.*
  * @param fechaDeInicio
  */
 data class Grupo(
-    val nombreDeGrupo: String,
-    val cicloEscolar: String,
+    var nombreDeGrupo: String,
+    var cicloEscolar: String,
     var fechaDeInicio: Date? = null,
     var fechaDeTermino: Date? = null,
     var fechaDeEliminacion: Date? = null,

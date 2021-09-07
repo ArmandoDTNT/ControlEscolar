@@ -51,16 +51,14 @@ class ControlEscolar(
                     managerGrupo.ejecutaFlujoParaEliminarUnGrupo()
                     redireccionaMenu()
                 }
-                7 -> {
-                }//eliminaUnAlumno()
-                8 -> {
-                }
-                9 -> {
-                }//consultaListaDeGrupos()
-                10 -> {
-                }//asignarEvaluaciones()
-                11 -> ejecutaFlujoParaIniciarCurso()
-                12 -> ejecutaFlujoParaFinalizarElCurso()
+                7 -> managerGrupo.EditaUnGrupo(onComplete = ::redireccionaMenu)
+                8 -> {}//Inscribir un alumno
+                9 -> {}//Eliminar un Alumno
+                10 -> {}//Asignar una evaluacion
+                11 -> {}//Consultar evaluaciones de un alumno
+                12 -> {}// lista de grupo y promedio grupal
+                13 -> ejecutaFlujoParaIniciarCurso()
+                14 -> ejecutaFlujoParaFinalizarElCurso()
                 null -> {
                 }
                 else -> {
