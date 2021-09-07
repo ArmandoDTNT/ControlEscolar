@@ -3,8 +3,8 @@ package domain.entity
 import java.util.*
 
 data class Materia(
-    val nombreDeMateria: String,
-    val codigoDeMateria: String,
+    var nombreDeMateria: String,
+    var codigoDeMateria: String,
     var fechaDeEliminacion: Date? = null
 ) {
 

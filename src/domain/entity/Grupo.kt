@@ -13,6 +13,7 @@ data class Grupo(
     var fechaDeInicio: Date? = null,
     var fechaDeTermino: Date? = null,
     var fechaDeEliminacion: Date? = null,
+    val uuid: String = UUID.randomUUID().toString()
 ) {
 
     /* Asigna al grupo las evaluaciones que se realizaran */

@@ -29,35 +29,40 @@ class ControlEscolar(
         saludoProfesor()
         muestraMenu()
         val opcionSeleccionada: Int? = ManagerInteraccion.getOption()
-        when (opcionSeleccionada) {
-            0 -> finalizaPrograma()
-            1 -> managerMateria.agregaUnaMateria()//TODO Verificar redireccionamiento
-            2 -> {
-                managerMateria.ejecutaFlujoParaEliminarUnaMateria(::redireccionaMenu)
-                ManagerInteraccion.awaitForEnterKeyInteraction()
-            }
-            3 -> {
-                managerMateria.consultaListaDeMaterias()
-                ManagerInteraccion.awaitForEnterKeyInteraction()
-            }
-            4 -> managerGrupo.agregaUnGrupo()//TODO Verificar redireccionamiento
-            5 -> {
-                managerGrupo.ejecutaFlujoParaEliminarUnGrupo()
-                ManagerInteraccion.awaitForEnterKeyInteraction()
-            }
-            6 -> {
-            }//eliminaUnAlumno()
-            7 -> {
-            }
-            8 -> {
-            }//consultaListaDeGrupos()
-            9 -> {
-            }//asignarEvaluaciones()
-            10 -> ejecutaFlujoParaIniciarCurso()
-            11 -> ejecutaFlujoParaFinalizarElCurso()
-            null -> {
-            }
-            else -> {
+        if (opcionSeleccionada !in 0..11) {
+            println("Por favor selecciona una opcion valida dentro del menu")
+            execute()
+        } else {
+            when (opcionSeleccionada) {
+                0 -> finalizaPrograma()
+                1 -> managerMateria.agregaUnaMateria(onComplete = ::redireccionaFlujo)
+                2 -> {
+                    managerMateria.ejecutaFlujoParaEliminarUnaMateria(::redireccionaMenu)
+                }
+                3 -> {
+                    managerMateria.consultaListaDeMaterias()
+                    redireccionaMenu()
+                }
+                4 -> managerMateria.editaUnaMateria(::redireccionaMenu)
+                5 -> managerGrupo.agregaUnGrupo(onComplete = ::redireccionaFlujo)
+                6 -> {
+                    managerGrupo.ejecutaFlujoParaEliminarUnGrupo()
+                    redireccionaMenu()
+                }
+                7 -> {
+                }//eliminaUnAlumno()
+                8 -> {
+                }
+                9 -> {
+                }//consultaListaDeGrupos()
+                10 -> {
+                }//asignarEvaluaciones()
+                11 -> ejecutaFlujoParaIniciarCurso()
+                12 -> ejecutaFlujoParaFinalizarElCurso()
+                null -> {
+                }
+                else -> {
+                }
             }
         }
 
@@ -79,7 +84,7 @@ class ControlEscolar(
         . Agrega una materia
         . Elimina una materia
         . Consulta lista de materias
-        . Agrega un grupo
+        . Edita una materia
         . Elimina un grupo
         . Consulta lista de un Grupo
         . Inscribe un Alumno
@@ -106,12 +111,12 @@ class ControlEscolar(
      */
     fun ejecutaFlujoParaIniciarCurso() {
         ManagerInteraccion.cleanInput()
-        println("Selecciona el grupo para iniciar el curso")
         val listaDeGrupos = profesor.getGrupos().filterNot { it.haIniciado() }
         if (listaDeGrupos.isEmpty()) {
             val title: String = "Aun no ha dado de alta algun grupo"
             return
         }
+        println("Selecciona el grupo para iniciar el curso")
         listaDeGrupos.forEachIndexed { index, grupo ->
             println("${index.inc()} $grupo")
         }
@@ -135,12 +140,12 @@ class ControlEscolar(
      */
     fun ejecutaFlujoParaFinalizarElCurso() {
         ManagerInteraccion.cleanInput()
-        println("Selecciona el grupo para finalizar el curso")
         val listaDeGrupos = profesor.getGrupos().filter { it.haIniciado() }
         if (listaDeGrupos.isEmpty()) {
             println("Aun no hay grupos que hayan iniciado el semestre")
             redireccionaMenu()
         }
+        println("Selecciona el grupo para finalizar el curso")
         listaDeGrupos.forEachIndexed { index, grupo ->
             println("${index.inc()} $grupo")
         }

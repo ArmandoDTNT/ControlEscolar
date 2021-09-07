@@ -3,6 +3,7 @@ package main.presentation.manager
 import domain.exception.agrega_materia.MateriaPreviamenteAgregadaException
 import main.data.Profesor
 import main.presentation.ControlEscolar
+import java.util.concurrent.CountedCompleter
 
 class ManagerGrupo(
     private val profesor: Profesor
@@ -15,7 +16,9 @@ class ManagerGrupo(
      *  @throws GrupoPreviamenteAgregadoExcetion cuando la materia ya se encuentra dentro de la lista, se indica al usuario y se brinda la
      *  posibilidad de intentar con otra materia.
      */
-    fun agregaUnGrupo() {
+    fun agregaUnGrupo(
+        onComplete: (title:String, content:String, action: () -> Unit) -> Unit
+    ) {
         ManagerInteraccion.cleanInput()
         println("Por favor indique el nombre del Grupo")
         val nombreDelGrupo: String = ManagerInteraccion.getNextLine()
@@ -26,9 +29,12 @@ class ManagerGrupo(
         } catch (e: MateriaPreviamenteAgregadaException) {
             val title: String = "El grupo $nombreDelGrupo con ciclo escolar $cicloEscolar ya se encuentra en la lista"
             val content: String = "¿Desea intentar con otra materia?"
+            onComplete(title,content){agregaUnGrupo(onComplete)}
+            return
         }
         val title: String = "\"El grupo $nombreDelGrupo con ciclo escolar $cicloEscolar se ha agregado con exito"
         val content: String = "¿Desea agregar con otro Grupo?"
+        onComplete(title,content){agregaUnGrupo(onComplete)}
     }
 
     /**
