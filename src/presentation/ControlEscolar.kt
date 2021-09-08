@@ -1,7 +1,6 @@
 package main.presentation
 
 import domain.entity.Grupo
-import domain.exception.agrega_materia.MateriaPreviamenteAgregadaException
 import main.data.Profesor
 import main.presentation.manager.ManagerAlumno
 import main.presentation.manager.ManagerGrupo
@@ -28,7 +27,7 @@ class ControlEscolar(
     fun execute() {
         saludoProfesor()
         muestraMenu()
-        val opcionSeleccionada: Int? = ManagerInteraccion.getOption()
+        val opcionSeleccionada: Int? = ManagerInteraccion.getInt()
         if (opcionSeleccionada !in 0..11) {
             ManagerInteraccion.cleanInput()
             println("Por favor selecciona una opcion valida dentro del menu")
@@ -52,7 +51,7 @@ class ControlEscolar(
                     redireccionaMenu()
                 }
                 7 -> managerGrupo.EditaUnGrupo(onComplete = ::redireccionaMenu)
-                8 -> {}//Inscribir un alumno
+                8 -> {}
                 9 -> {}//Eliminar un Alumno
                 10 -> {}//Asignar una evaluacion
                 11 -> {}//Consultar evaluaciones de un alumno
@@ -120,7 +119,7 @@ class ControlEscolar(
         listaDeGrupos.forEachIndexed { index, grupo ->
             println("${index.inc()} $grupo")
         }
-        val opcionSeleccionada: Int = ManagerInteraccion.getOption() ?: -1
+        val opcionSeleccionada: Int = ManagerInteraccion.getInt() ?: -1
         when {
             opcionSeleccionada !in 1..listaDeGrupos.size -> {
                 println("Por favor selecciona una opcion valida del menu")
@@ -149,7 +148,7 @@ class ControlEscolar(
         listaDeGrupos.forEachIndexed { index, grupo ->
             println("${index.inc()} $grupo")
         }
-        val opcionSeleccionada: Int = ManagerInteraccion.getOption() ?: -1
+        val opcionSeleccionada: Int = ManagerInteraccion.getInt() ?: -1
         when {
             opcionSeleccionada !in 1..listaDeGrupos.size -> {
                 println("Por favor selecciona una opcion valida del menu")
@@ -183,11 +182,11 @@ class ControlEscolar(
         """.trimIndent()
         println(menuReintentar)
         //
-        var opcionSeleccionada: Int? = ManagerInteraccion.getOption()
+        var opcionSeleccionada: Int? = ManagerInteraccion.getInt()
         while (opcionSeleccionada != 1 && opcionSeleccionada != 2) {
             println("La opcion elegida no esta en el menu, por favor selecciona una opcion valida")
             ManagerInteraccion.cleanInput()
-            opcionSeleccionada = ManagerInteraccion.getOption()
+            opcionSeleccionada = ManagerInteraccion.getInt()
         }
         //
         when (opcionSeleccionada) {

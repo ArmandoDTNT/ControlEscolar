@@ -68,7 +68,7 @@ class ManagerMateria(
             listaDeMaterias.forEachIndexed { index, materia ->
                 println("${index.inc()} $materia")
             }
-            val opcionSeleccionada = ManagerInteraccion.getOption() ?: -1
+            val opcionSeleccionada = ManagerInteraccion.getInt() ?: -1
             if (opcionSeleccionada !in 1..listaDeMaterias.size) {
                 println("Por favor selecciona una opcion dentro del menu")
                 ManagerInteraccion.cleanInput()
@@ -94,7 +94,7 @@ class ManagerMateria(
             2) Identificar la materia en lista de materias
         """.trimIndent()
         println(menuEditaMateria)
-        val opcionSeleccionada: Int? = ManagerInteraccion.getOption()
+        val opcionSeleccionada: Int? = ManagerInteraccion.getInt()
         when (opcionSeleccionada) {
             1 -> editaMateriaConCodigo(onComplete)
             2 -> editaMateriaDeLista(onComplete)
@@ -144,7 +144,7 @@ class ManagerMateria(
         listaDeMaterias.forEachIndexed { index, materia ->
             println("${index.inc()}, $materia")
         }
-        val opcionSeleccionada = ManagerInteraccion.getOption()
+        val opcionSeleccionada = ManagerInteraccion.getInt()
         while (opcionSeleccionada == null || opcionSeleccionada !in 1..listaDeMaterias.size) {
             println("La opcion seleccionada no esta en el menu, por favor intenta de nuevo con una opcion valida")
             editaMateriaDeLista(onComplete)

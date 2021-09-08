@@ -2,6 +2,7 @@ package domain.entity
 
 import domain.exception.inscribir_alumno.AlumnoPreviamenteInscritoException
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  *
@@ -32,6 +33,8 @@ data class Grupo(
     @Throws(AlumnoPreviamenteInscritoException::class)
     fun inscribirAlumno(nombre: String, numeroDeCuenta: Int) {
         val alumno: Alumno = Alumno(nombre, numeroDeCuenta)
+        // TODO: Lanzar excepcion si el alumno ya existe
+        // throw AlumnoPreviamenteInscritoException(nombre, numeroDeCuenta)
         listaDeAlumnos.add(alumno)
     }
 

@@ -37,7 +37,7 @@ object ManagerInteraccion {
      * @return [Int] que representa la opcion seleccionada por el usuario. Null en caso de que la opcion seleccionada
      * por el usuario no sea un [Int]
      */
-    fun getOption(): Int? = try {
+    fun getInt(): Int? = try {
         scanner.nextInt()
     } catch (e: Exception) {
         null

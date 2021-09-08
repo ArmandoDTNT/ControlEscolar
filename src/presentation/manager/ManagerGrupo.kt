@@ -2,7 +2,10 @@ package main.presentation.manager
 
 import domain.entity.Grupo
 import domain.exception.agrega_materia.MateriaPreviamenteAgregadaException
+import domain.exception.inscribir_alumno.AlumnoPreviamenteInscritoException
 import main.data.Profesor
+import main.domain.exception.groups_manager.NotAvailableGroupsException
+import kotlin.jvm.Throws
 
 class ManagerGrupo(
     private val profesor: Profesor
@@ -49,7 +52,7 @@ class ManagerGrupo(
         listaDeGrupos.forEachIndexed { index, grupo ->
             println("${index.inc()} $grupo")
         }
-        val opcionSeleccionada: Int = ManagerInteraccion.getOption() ?: -1
+        val opcionSeleccionada: Int = ManagerInteraccion.getInt() ?: -1
         when {
             opcionSeleccionada in 1..listaDeGrupos.size -> {
                 println("Por favor selecciona una opcion valida dentro del menu")
@@ -77,7 +80,7 @@ class ManagerGrupo(
         listaDeGrupos.forEachIndexed { index, grupo ->
             println(" ${index.inc()} ${grupo.nombreDeGrupo} ${grupo.cicloEscolar} ${grupo.numeroDeEvaluaciones}")
         }
-        val opcionSeleccionada: Int? = ManagerInteraccion.getOption()
+        val opcionSeleccionada: Int? = ManagerInteraccion.getInt()
         if (opcionSeleccionada == null || opcionSeleccionada !in 1..listaDeGrupos.size) {
             println("Por favor selecciona una opcion valida dentro del menu")
             EditaUnGrupo(onComplete)
@@ -88,10 +91,10 @@ class ManagerGrupo(
             val nuevoNombreGrupo: String = ManagerInteraccion.getNextLine()
             println("Indique por favor el nuevo ciclo escolar")
             val nuevoCicloEscolar: String = ManagerInteraccion.getNextLine()
-             val grupoYaExistente: Grupo? = profesor.getGrupos()
+            val grupoYaExistente: Grupo? = profesor.getGrupos()
                 .firstOrNull { it.nombreDeGrupo == nuevoNombreGrupo && it.cicloEscolar == nuevoCicloEscolar }
             val grupoYaExiste: Boolean = grupoYaExistente != null
-            if (grupoYaExiste){
+            if (grupoYaExiste) {
                 println("Los datos que proporcionas ya estan asignados a un grupo")
                 onComplete.invoke()
             } else {
@@ -102,6 +105,62 @@ class ManagerGrupo(
             }
         }
 
+    }
+
+    /**
+     *  Solicita al usuario el nombre y numero de cuenta del alumno, despliega una lista de grupos filtrada a grupos
+     *  en los que aun no se da inicio el semestre, al crear la instancia Alumno se valida que no se encuentre inscrito
+     *  anteriormente a esa instancia de grupo.
+     *
+     *  @throws AlumnoPreviamenteInscritoException cuando el alumno ya se encuentra dentro de la lista de alumnos, se
+     *  indica al usuario y se redirige al menu principal
+     */
+    fun flujoParaInscribirAlumno(onComplete: () -> Unit) {
+        var grupoSeleccionado: Grupo? = null
+        try {
+            grupoSeleccionado = grupoParaInscribirAlumno()
+            inscribirAlumno(grupoSeleccionado)
+        } catch (e: NotAvailableGroupsException) {
+            println("No hay grupos disponibles en los que puedas incribir alumnos")
+            onComplete.invoke()
+        } catch (e: AlumnoPreviamenteInscritoException) {
+            val title: String = "El alumno  con numero de cuenta ${e.numeroDeCuenta}, ya se encuentra" +
+                    "en la lista del grupo ${grupoSeleccionado?.nombreDeGrupo}"
+            val content: String = "Intenta con otro alumno."
+            flujoParaInscribirAlumno(onComplete)
+        }
+    }
+
+    @Throws(NotAvailableGroupsException::class)
+    fun grupoParaInscribirAlumno(): Grupo {
+        val gruposDisponibles = profesor.getAvailableGroups()
+        if (gruposDisponibles.isEmpty())
+            throw NotAvailableGroupsException()
+        println("Por favor seleccione el grupo al que desea inscribir al alumno")
+        gruposDisponibles.forEachIndexed { index, grupo ->
+            println("${index.inc()} ${grupo.nombreDeGrupo} ${grupo.cicloEscolar}")
+        }
+        var opcionSeleccionada: Int? = ManagerInteraccion.getInt()
+        while (opcionSeleccionada == null || opcionSeleccionada !in 1..gruposDisponibles.size) {
+            println("Por favor selecciona una opcion valida dentro del menu")
+            opcionSeleccionada = ManagerInteraccion.getInt()
+        }
+        val grupoSeleccionado: Grupo = gruposDisponibles.get(opcionSeleccionada.dec())
+        return grupoSeleccionado
+    }
+
+    @Throws(AlumnoPreviamenteInscritoException::class)
+    fun inscribirAlumno(grupoSeleccionado: Grupo) {
+        println("Indica el nombre del alumno")
+        val nombreDelAlumno: String = ManagerInteraccion.getNextLine()
+        println("Indica el nombre del alumno")
+        var numeroDeCuenta: Int? = ManagerInteraccion.getInt()
+        while (numeroDeCuenta == null) {
+            println("El numero de cuenta del alumno unicamente es numerico, por favor proporciona un valor valido")
+            ManagerInteraccion.cleanInput()
+            numeroDeCuenta = ManagerInteraccion.getInt()
+        }
+        grupoSeleccionado.inscribirAlumno(nombreDelAlumno, numeroDeCuenta)
     }
 
 

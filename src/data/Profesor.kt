@@ -63,5 +63,12 @@ class Profesor(
      */
     fun getGrupos(): List<Grupo> = listaDeGrupos
 
+    /**
+     *
+     */
+    fun getAvailableGroups(): List<Grupo> = listaDeGrupos
+        .filter { it.fechaDeEliminacion == null }
+        .filter { it.fechaDeInicio == null }
+
 
 }
