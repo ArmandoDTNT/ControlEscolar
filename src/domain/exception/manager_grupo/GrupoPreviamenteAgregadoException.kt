@@ -1,3 +1,3 @@
-package domain.exception.agrega_grupo
+package domain.exception.manager_grupo
 
 class GrupoPreviamenteAgregadoException : Exception()

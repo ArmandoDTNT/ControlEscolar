@@ -1,4 +1,4 @@
-package main.domain.exception.groups_manager
+package main.domain.exception.Manager_grupo
 
 /**
  *

@@ -2,8 +2,8 @@ package main.data
 
 import domain.entity.Grupo
 import domain.entity.Materia
-import domain.exception.agrega_grupo.GrupoPreviamenteAgregadoException
-import domain.exception.agrega_materia.MateriaPreviamenteAgregadaException
+import domain.exception.manager_grupo.GrupoPreviamenteAgregadoException
+import domain.exception.Manager_materia.MateriaPreviamenteAgregadaException
 import kotlin.jvm.Throws
 
 /**

@@ -1,7 +1,7 @@
 package main.presentation.manager
 
 import domain.entity.Materia
-import domain.exception.agrega_materia.MateriaPreviamenteAgregadaException
+import domain.exception.Manager_materia.MateriaPreviamenteAgregadaException
 import main.data.Profesor
 
 class ManagerMateria(

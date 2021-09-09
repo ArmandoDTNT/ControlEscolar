@@ -1,6 +1,8 @@
 package domain.entity
 
-import domain.exception.inscribir_alumno.AlumnoPreviamenteInscritoException
+import domain.exception.manager_grupo.AlumnoPreviamenteInscritoException
+import main.domain.exception.Manager_grupo.AlumnoNoEncontradoEnListaException
+import main.framework.contains
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -33,26 +35,25 @@ data class Grupo(
     @Throws(AlumnoPreviamenteInscritoException::class)
     fun inscribirAlumno(nombre: String, numeroDeCuenta: Int) {
         val alumno: Alumno = Alumno(nombre, numeroDeCuenta)
-        // TODO: Lanzar excepcion si el alumno ya existe
-        // throw AlumnoPreviamenteInscritoException(nombre, numeroDeCuenta)
+        if (listaDeAlumnos.contains { it.numeroDeCuenta == numeroDeCuenta}){
+            throw AlumnoPreviamenteInscritoException(numeroDeCuenta)
+        }
         listaDeAlumnos.add(alumno)
     }
 
     /**
-     * Valida se en la lista del grupo seleccionado se encuentra una instancia de Alumno y la elimina.
+     * Valida si en la lista del grupo seleccionado se encuentra una instancia de Alumno y la elimina.
      *
-     *@throws Exception cuando el alumno ya se encuentra dentro de la lista del grupo seleccionado,
-     * se indica al usuario y se brinda la posibilidad de intentar con otros datos.
+     * @throws AlumnoNoEncontradoEnListaException
      */
-    @Throws(AlumnoPreviamenteInscritoException::class)
+    @Throws(AlumnoNoEncontradoEnListaException::class)
     fun eliminarAlumno(numeroDeCuenta: Int) {
-        var borrar: Alumno? = null
-        for (alumno in listaDeAlumnos) {
-            if (numeroDeCuenta == alumno.numeroDeCuenta) {
-                borrar = alumno
-                listaDeAlumnos.remove(borrar)
-                return
-            }
+        val alumnoAEliminar: Alumno? = listaDeAlumnos.firstOrNull { it.numeroDeCuenta == numeroDeCuenta }
+        val existeAlumno: Boolean = alumnoAEliminar != null
+        if (existeAlumno) {
+            listaDeAlumnos.remove(alumnoAEliminar)
+        } else {
+         throw AlumnoNoEncontradoEnListaException()
         }
     }
 

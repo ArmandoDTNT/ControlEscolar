@@ -1,4 +1,4 @@
-package domain.exception.agrega_materia
+package domain.exception.Manager_materia
 
 /**
  * Se dispara en caso de que al validar la instancia Materia creada con los datos proporcionados por el usuario

@@ -1,10 +1,12 @@
 package main.presentation.manager
 
 import domain.entity.Grupo
-import domain.exception.agrega_materia.MateriaPreviamenteAgregadaException
-import domain.exception.inscribir_alumno.AlumnoPreviamenteInscritoException
+import domain.exception.Manager_materia.MateriaPreviamenteAgregadaException
+import domain.exception.manager_grupo.AlumnoPreviamenteInscritoException
 import main.data.Profesor
-import main.domain.exception.groups_manager.NotAvailableGroupsException
+import main.domain.exception.Manager_grupo.AlumnoNoEncontradoEnListaException
+import main.domain.exception.Manager_grupo.NotAvailableGroupsException
+import main.framework.contains
 import kotlin.jvm.Throws
 
 class ManagerGrupo(
@@ -69,7 +71,7 @@ class ManagerGrupo(
      * Se encarga de realizar validaciones mediante las cuales de ser exitosas permitan editar los atributos
      * [nombreDeGrupo] y [cicloEscolar] de un grupo.
      */
-    fun EditaUnGrupo(onComplete: () -> Unit) {
+    fun editaUnGrupo(onComplete: () -> Unit) {
         val listaDeGrupos: List<Grupo> = profesor.getGrupos().filter { it.fechaDeInicio == null }
         if (listaDeGrupos.isEmpty()) {
             println("Aun no cuentas con grupos que puedas editar")
@@ -83,7 +85,7 @@ class ManagerGrupo(
         val opcionSeleccionada: Int? = ManagerInteraccion.getInt()
         if (opcionSeleccionada == null || opcionSeleccionada !in 1..listaDeGrupos.size) {
             println("Por favor selecciona una opcion valida dentro del menu")
-            EditaUnGrupo(onComplete)
+            editaUnGrupo(onComplete)
         } else {
             val grupoSeleccionado: Grupo = listaDeGrupos.get(opcionSeleccionada.dec())
             ManagerInteraccion.cleanInput()
@@ -108,18 +110,20 @@ class ManagerGrupo(
     }
 
     /**
-     *  Solicita al usuario el nombre y numero de cuenta del alumno, despliega una lista de grupos filtrada a grupos
-     *  en los que aun no se da inicio el semestre, al crear la instancia Alumno se valida que no se encuentre inscrito
-     *  anteriormente a esa instancia de grupo.
+     *  Inicializa el flujo para añadir un alumno a la lista y controla los posibles errores durante el proceso.
+     *
+     *  @throws NotAvailableGroupsException cuando la lista de grupos es vacia.
      *
      *  @throws AlumnoPreviamenteInscritoException cuando el alumno ya se encuentra dentro de la lista de alumnos, se
      *  indica al usuario y se redirige al menu principal
      */
-    fun flujoParaInscribirAlumno(onComplete: () -> Unit) {
+    fun ejecutaFlujoParaInscribirAlumno(onComplete: () -> Unit) {
         var grupoSeleccionado: Grupo? = null
         try {
-            grupoSeleccionado = grupoParaInscribirAlumno()
-            inscribirAlumno(grupoSeleccionado)
+            val title: String = "Por favor seleccione el grupo al que desea inscribir al alumno"
+            val grupos: List<Grupo> = profesor.getAvailableGroups()
+            grupoSeleccionado = obtenerGrupo(title, grupos)
+            inscribeAlumno(grupoSeleccionado)
         } catch (e: NotAvailableGroupsException) {
             println("No hay grupos disponibles en los que puedas incribir alumnos")
             onComplete.invoke()
@@ -127,33 +131,46 @@ class ManagerGrupo(
             val title: String = "El alumno  con numero de cuenta ${e.numeroDeCuenta}, ya se encuentra" +
                     "en la lista del grupo ${grupoSeleccionado?.nombreDeGrupo}"
             val content: String = "Intenta con otro alumno."
-            flujoParaInscribirAlumno(onComplete)
+            ejecutaFlujoParaInscribirAlumno(onComplete)
         }
     }
 
+    /**
+     * Identifica y retorna un grupo.
+     *
+     * @throws NotAvailableGroupsException cuando la lista de grupos es vacia.
+     */
     @Throws(NotAvailableGroupsException::class)
-    fun grupoParaInscribirAlumno(): Grupo {
-        val gruposDisponibles = profesor.getAvailableGroups()
-        if (gruposDisponibles.isEmpty())
+    fun obtenerGrupo(title: String, grupos: List<Grupo>): Grupo {
+        if (grupos.isEmpty())
             throw NotAvailableGroupsException()
-        println("Por favor seleccione el grupo al que desea inscribir al alumno")
-        gruposDisponibles.forEachIndexed { index, grupo ->
+        println(title)
+        grupos.forEachIndexed { index, grupo ->
             println("${index.inc()} ${grupo.nombreDeGrupo} ${grupo.cicloEscolar}")
         }
         var opcionSeleccionada: Int? = ManagerInteraccion.getInt()
-        while (opcionSeleccionada == null || opcionSeleccionada !in 1..gruposDisponibles.size) {
+        while (opcionSeleccionada == null || opcionSeleccionada !in 1..grupos.size) {
             println("Por favor selecciona una opcion valida dentro del menu")
             opcionSeleccionada = ManagerInteraccion.getInt()
         }
-        val grupoSeleccionado: Grupo = gruposDisponibles.get(opcionSeleccionada.dec())
+        val grupoSeleccionado: Grupo = grupos.get(opcionSeleccionada.dec())
         return grupoSeleccionado
     }
 
+    /**
+     * Toma y valida los atributos necesarios para crear un alumno.
+     *
+     * @throws AlumnoPreviamenteInscritoException cuando un alumno con mismos atributos ya se encuentra agregado a la
+     * lista de [grupoSeleccionado]
+     *
+     * @throws AlumnoPreviamenteInscritoException cuando un alumno con mismos atributos ya se encuentra agregado a la
+     * lista de [grupoSeleccionado]
+     */
     @Throws(AlumnoPreviamenteInscritoException::class)
-    fun inscribirAlumno(grupoSeleccionado: Grupo) {
+    fun inscribeAlumno(grupoSeleccionado: Grupo) {
         println("Indica el nombre del alumno")
         val nombreDelAlumno: String = ManagerInteraccion.getNextLine()
-        println("Indica el nombre del alumno")
+        println("Indica el numero de cuenta del alumno")
         var numeroDeCuenta: Int? = ManagerInteraccion.getInt()
         while (numeroDeCuenta == null) {
             println("El numero de cuenta del alumno unicamente es numerico, por favor proporciona un valor valido")
@@ -162,6 +179,52 @@ class ManagerGrupo(
         }
         grupoSeleccionado.inscribirAlumno(nombreDelAlumno, numeroDeCuenta)
     }
+
+    /**
+     * Toma y valida los atributos necesarios para crear un alumno.
+     *
+     * @throws AlumnoPreviamenteInscritoException cuando un alumno con mismos atributos ya se encuentra agregado a la
+     * lista de [grupoSeleccionado]
+     *
+     * @throws AlumnoNoEncontradoEnListaException cuando en la lista de alumnos del grupo no se identifica algun alumno
+     * con el numero de cuenta proporcionado
+     */
+    fun ejecutaFlujoParaEliminarUnAlumno(onComplete: () -> Unit) {
+        var grupoSeleccionado: Grupo? = null
+        try {
+            val title: String = ("Por favor seleccione el grupo en el que quiere eliminar al alumno")
+            val grupos: List<Grupo> = profesor.getAvailableGroups()
+            grupoSeleccionado = obtenerGrupo(title,grupos)
+            eliminaAlumno(grupoSeleccionado)
+        } catch (e: NotAvailableGroupsException){
+            println("No hay grupos disponibles de los que puedas eliminar un alumno")
+            onComplete.invoke()
+        } catch (e:AlumnoNoEncontradoEnListaException) {
+            println("El numero de cuenta que proporcionas no esta asociado a ningun alumno")
+            onComplete.invoke()
+        }
+
+    }
+
+    /**
+     * Toma y valida el numero de cuenta del alumno que se busca eliminar de la lista.
+     *
+     * @throws AlumnoNoEncontradoEnListaException cuando en la lista de alumnos del grupo no se identifica algun alumno
+     * con el numero de cuenta proporcionado
+     */
+    @Throws(AlumnoNoEncontradoEnListaException::class)
+    fun eliminaAlumno(grupoSeleccionado: Grupo) {
+        println("Indica el nombre del alumno")
+        var numeroDeCuenta: Int? = ManagerInteraccion.getInt()
+        while (numeroDeCuenta == null) {
+            println("El numero de cuenta del alumno unicamente es numerico, por favor proporciona un valor valido")
+            ManagerInteraccion.cleanInput()
+            numeroDeCuenta = ManagerInteraccion.getInt()
+        }
+        grupoSeleccionado.eliminarAlumno(numeroDeCuenta)
+    }
+
+
 
 
 }

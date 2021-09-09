@@ -50,9 +50,9 @@ class ControlEscolar(
                     managerGrupo.ejecutaFlujoParaEliminarUnGrupo()
                     redireccionaMenu()
                 }
-                7 -> managerGrupo.EditaUnGrupo(onComplete = ::redireccionaMenu)
-                8 -> {}
-                9 -> {}//Eliminar un Alumno
+                7 -> managerGrupo.editaUnGrupo(onComplete = ::redireccionaMenu)
+                8 -> managerGrupo.ejecutaFlujoParaInscribirAlumno(onComplete = ::redireccionaMenu)
+                9 -> managerGrupo.ejecutaFlujoParaEliminarUnAlumno(onComplete = ::redireccionaMenu)
                 10 -> {}//Asignar una evaluacion
                 11 -> {}//Consultar evaluaciones de un alumno
                 12 -> {}// lista de grupo y promedio grupal
