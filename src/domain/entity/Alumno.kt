@@ -4,18 +4,18 @@ data class Alumno(
     val nombre: String,
     val numeroDeCuenta: Int
 ) {
+    /* Valor asignado al grupo que consta del numero de calificaciones que tendran los alumnos*/
+    var numeroDeCalificaciones: Int = 0
     /* Lista en la que se guardan las evaluaciones asignadas por el profesor que va del 0 al 10 o NP=0 que depende
     del grupo en el que se encuentre el alumno */
-    var listaDeCalificaciones: ArrayList<Double> = arrayListOf()
+    var arregloDeCalificaciones: Array<Double> = Array<Double>(size = numeroDeCalificaciones){-1.0}
 
-    /* Valor asignado por el profesor al grupo que consta del numero de calificaciones que tendran los alumnos*/
-    var numeroDeCalificaciones: Int = 5
 
     /**
      * Asigna al alumno una calificacion en posicion de la lista seleccionada.
      */
-    fun asignarCalificacion(calificacion: Double = 0.0) {
-        listaDeCalificaciones.set(numeroDeCalificaciones, calificacion)
+    fun asignarCalificacion(indice: Int, evaluacionAsignada: Double) {
+        arregloDeCalificaciones.set(indice,evaluacionAsignada)
     }
 
     /**

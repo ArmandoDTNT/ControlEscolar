@@ -20,7 +20,7 @@ data class Grupo(
 ) {
 
     /* Asigna al grupo las evaluaciones que se realizaran */
-    val numeroDeEvaluaciones: Int = 0
+    var numeroDeEvaluaciones: Int? = null
 
     /* Contiene las instancias de alumno correspondientes a cada grupo */
     var listaDeAlumnos: ArrayList<Alumno> = arrayListOf()
@@ -55,6 +55,13 @@ data class Grupo(
         } else {
          throw AlumnoNoEncontradoEnListaException()
         }
+    }
+
+    /**
+     * Modifica la cantidad de evaluaciones del grupo recibiendo como parametro [cantidadDeEvaluaciones]
+     */
+    fun asignaCantidadEvaluaciones(cantidadDeEvaluaciones: Int) {
+        numeroDeEvaluaciones = cantidadDeEvaluaciones
     }
 
     /**

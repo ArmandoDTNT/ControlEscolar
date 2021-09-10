@@ -28,7 +28,7 @@ class ControlEscolar(
         saludoProfesor()
         muestraMenu()
         val opcionSeleccionada: Int? = ManagerInteraccion.getInt()
-        if (opcionSeleccionada !in 0..11) {
+        if (opcionSeleccionada !in 0..15) {
             ManagerInteraccion.cleanInput()
             println("Por favor selecciona una opcion valida dentro del menu")
             execute()
@@ -53,11 +53,12 @@ class ControlEscolar(
                 7 -> managerGrupo.editaUnGrupo(onComplete = ::redireccionaMenu)
                 8 -> managerGrupo.ejecutaFlujoParaInscribirAlumno(onComplete = ::redireccionaMenu)
                 9 -> managerGrupo.ejecutaFlujoParaEliminarUnAlumno(onComplete = ::redireccionaMenu)
-                10 -> {}//Asignar una evaluacion
-                11 -> {}//Consultar evaluaciones de un alumno
-                12 -> {}// lista de grupo y promedio grupal
-                13 -> ejecutaFlujoParaIniciarCurso()
-                14 -> ejecutaFlujoParaFinalizarElCurso()
+                10 -> managerGrupo.ejecutaFlujoParaAsignarNumeroDeEvaluaciones(onComplete = ::redireccionaMenu)
+                11 -> managerAlumno.iniciaFlujoParaAsignarEvaluaciones(onFinish = ::redireccionaMenu)
+                12 -> {}//Consultar evaluaciones de un alumno
+                13 -> {}// lista de grupo y promedio grupal
+                14 -> ejecutaFlujoParaIniciarCurso()
+                15 -> ejecutaFlujoParaFinalizarElCurso()
                 null -> {
                 }
                 else -> {

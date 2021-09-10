@@ -1,6 +1,7 @@
 package main.presentation.manager
 
 import java.util.*
+import kotlin.math.nextDown
 
 /**
  *
@@ -39,6 +40,15 @@ object ManagerInteraccion {
      */
     fun getInt(): Int? = try {
         scanner.nextInt()
+    } catch (e: Exception) {
+        null
+    }
+
+    /**
+     *
+     */
+    fun getDouble(): Double? = try {
+        scanner.nextDouble()
     } catch (e: Exception) {
         null
     }

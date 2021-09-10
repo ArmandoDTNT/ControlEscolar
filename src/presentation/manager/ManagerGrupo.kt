@@ -1,5 +1,6 @@
 package main.presentation.manager
 
+import domain.entity.Alumno
 import domain.entity.Grupo
 import domain.exception.Manager_materia.MateriaPreviamenteAgregadaException
 import domain.exception.manager_grupo.AlumnoPreviamenteInscritoException
@@ -11,14 +12,14 @@ import kotlin.jvm.Throws
 
 class ManagerGrupo(
     private val profesor: Profesor
-) {
+) : GrupoIdentificable {
 
     /**
      *  Solicita al usuario los datos nombre del grupo y codigo del grupo,,
      *  al crear la instancia grupo se valida que no se cuente con alguno agregado anteriormente.
      *
-     *  @throws GrupoPreviamenteAgregadoExcetion cuando la materia ya se encuentra dentro de la lista, se indica al usuario y se brinda la
-     *  posibilidad de intentar con otra materia.
+     *  @throws GrupoPreviamenteAgregadoExcetion cuando la materia ya se encuentra dentro de la lista, se indica al
+     *  usuario y se brinda la posibilidad de intentar con otra materia.
      */
     fun agregaUnGrupo(
         onComplete: (title: String, content: String, action: () -> Unit) -> Unit
@@ -124,6 +125,8 @@ class ManagerGrupo(
             val grupos: List<Grupo> = profesor.getAvailableGroups()
             grupoSeleccionado = obtenerGrupo(title, grupos)
             inscribeAlumno(grupoSeleccionado)
+            println("El alumno se ha inscrito con exito")
+            onComplete.invoke()
         } catch (e: NotAvailableGroupsException) {
             println("No hay grupos disponibles en los que puedas incribir alumnos")
             onComplete.invoke()
@@ -133,28 +136,6 @@ class ManagerGrupo(
             val content: String = "Intenta con otro alumno."
             ejecutaFlujoParaInscribirAlumno(onComplete)
         }
-    }
-
-    /**
-     * Identifica y retorna un grupo.
-     *
-     * @throws NotAvailableGroupsException cuando la lista de grupos es vacia.
-     */
-    @Throws(NotAvailableGroupsException::class)
-    fun obtenerGrupo(title: String, grupos: List<Grupo>): Grupo {
-        if (grupos.isEmpty())
-            throw NotAvailableGroupsException()
-        println(title)
-        grupos.forEachIndexed { index, grupo ->
-            println("${index.inc()} ${grupo.nombreDeGrupo} ${grupo.cicloEscolar}")
-        }
-        var opcionSeleccionada: Int? = ManagerInteraccion.getInt()
-        while (opcionSeleccionada == null || opcionSeleccionada !in 1..grupos.size) {
-            println("Por favor selecciona una opcion valida dentro del menu")
-            opcionSeleccionada = ManagerInteraccion.getInt()
-        }
-        val grupoSeleccionado: Grupo = grupos.get(opcionSeleccionada.dec())
-        return grupoSeleccionado
     }
 
     /**
@@ -168,6 +149,7 @@ class ManagerGrupo(
      */
     @Throws(AlumnoPreviamenteInscritoException::class)
     fun inscribeAlumno(grupoSeleccionado: Grupo) {
+        ManagerInteraccion.cleanInput()
         println("Indica el nombre del alumno")
         val nombreDelAlumno: String = ManagerInteraccion.getNextLine()
         println("Indica el numero de cuenta del alumno")
@@ -194,12 +176,12 @@ class ManagerGrupo(
         try {
             val title: String = ("Por favor seleccione el grupo en el que quiere eliminar al alumno")
             val grupos: List<Grupo> = profesor.getAvailableGroups()
-            grupoSeleccionado = obtenerGrupo(title,grupos)
+            grupoSeleccionado = obtenerGrupo(title, grupos)
             eliminaAlumno(grupoSeleccionado)
-        } catch (e: NotAvailableGroupsException){
+        } catch (e: NotAvailableGroupsException) {
             println("No hay grupos disponibles de los que puedas eliminar un alumno")
             onComplete.invoke()
-        } catch (e:AlumnoNoEncontradoEnListaException) {
+        } catch (e: AlumnoNoEncontradoEnListaException) {
             println("El numero de cuenta que proporcionas no esta asociado a ningun alumno")
             onComplete.invoke()
         }
@@ -224,7 +206,66 @@ class ManagerGrupo(
         grupoSeleccionado.eliminarAlumno(numeroDeCuenta)
     }
 
+    /**
+     * Inicia el flujo requerido para modificar el numero de evaluaciones de un grupo
+     *
+     * @throws NotAvailableGroupsException cuando la lista de grupos es vacia.
+     */
+    fun ejecutaFlujoParaAsignarNumeroDeEvaluaciones(onComplete: () -> Unit) {
+        val gruposDisponibles: List<Grupo> = profesor.getAvailableGroups()
+        val title: String = ("Por favor selecciona el grupo al que quieres asignar evaluaciones")
+        try {
+            val grupoSeleccionado: Grupo = obtenerGrupo(title, gruposDisponibles)
+            if (grupoSeleccionado.numeroDeEvaluaciones != null) {
+                flujoParaSobreescribirNumeroDeEvaluaciones(grupoSeleccionado)
+                onComplete.invoke()
+            }else{
+                println("Por favor indica el numero de evaluaciones para el grupo")
+                var nuevoNumeroDeCalificaciones: Int? = ManagerInteraccion.getInt()
+                while (nuevoNumeroDeCalificaciones == null) {
+                    println("El numero de evaluaciones debe ser un numero entero, por favor intenta de nuevo")
+                    nuevoNumeroDeCalificaciones = ManagerInteraccion.getInt()
+                }
+                grupoSeleccionado.asignaCantidadEvaluaciones(nuevoNumeroDeCalificaciones)
+                println("El nuevo numer de evaluaciones se ha asignado con exito")
+                onComplete.invoke()
+            }
+        } catch (e: NotAvailableGroupsException) {
+            println("No hay grupos disponibles en los que puedas incribir alumnos")
+            onComplete.invoke()
+        }
 
+    }
 
+    /**
+     * Identifica si previamente a un grupo se le asigno una evalucacion y valida consideraciones previas a
+     * permitir sobreescribirla
+     */
+    private fun flujoParaSobreescribirNumeroDeEvaluaciones(grupoSeleccionado: Grupo) {
+        println(
+            "El grupo seleccionado ya cuenta con ${grupoSeleccionado.numeroDeEvaluaciones} evaluaciones" +
+                    "indica el nuevo numero de evaluaciones"
+        )
+        var nuevoNumeroDeCalificaciones: Int? = ManagerInteraccion.getInt()
+        while (nuevoNumeroDeCalificaciones == null) {
+            println("El numero de evaluaciones debe ser un numero entero, por favor intenta de nuevo")
+            nuevoNumeroDeCalificaciones = ManagerInteraccion.getInt()
+        }
+        val alumnoConMasEvaluaciones: Alumno? = grupoSeleccionado.listaDeAlumnos
+            .firstOrNull {
+                it.numeroDeCalificaciones > nuevoNumeroDeCalificaciones
+            }
+        if (alumnoConMasEvaluaciones == null) {
+            grupoSeleccionado.asignaCantidadEvaluaciones(nuevoNumeroDeCalificaciones)
+            println("El nuevo numero de calificaciones se ha asignado de manera correcta")
+        } else {
+            println(
+                "No es posible asignar el nuevo numero de calificaciones, el Alumno ${alumnoConMasEvaluaciones.nombre} " +
+                        "ya cuenta con ${alumnoConMasEvaluaciones.numeroDeCalificaciones} numero de calificaciones capturadas"
+            )
+
+        }
+
+    }
 
 }
